@@ -41,21 +41,7 @@
             console.log(event);
         });
 
-
-    const playbackConfig = new cast.framework.PlaybackConfig();
-
-    // Sets the player to start playback as soon as there are five seconds of
-    // media contents buffered. Default is 10.
-    playbackConfig.autoResumeDuration = 5;
-
-    const myCastQueue = new MyCastQueue(); // create instance of queue Object
-
-    context.start({
-      playbackConfig: playbackConfig,
-      supportedCommands: cast.framework.messages.Command.ALL_BASIC_MEDIA |
-                         cast.framework.messages.Command.QUEUE_PREV |
-                         cast.framework.messages.Command.QUEUE_NEXT
-    });
+    context.start();
   </script>
 </body>
 </html>
