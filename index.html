@@ -45,7 +45,7 @@
         initialize(loadRequestData) {
             const media = loadRequestData.media;
             const items = [];
-            items.push(myCreateItem(media)); // your custom function logic
+            items.push(media); // your custom function logic
 
             const queueData = new cast.framework.messages.QueueData();
             queueData.items = items;
