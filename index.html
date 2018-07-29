@@ -16,27 +16,7 @@
   
   <script>
     const context = cast.framework.CastReceiverContext.getInstance();
-    const playerManager = context.getPlayerManager();
 
-    // intercept the LOAD request to be able to read in a contentId and get data
-    playerManager.setMessageInterceptor(
-        cast.framework.messages.MessageType.LOAD, loadRequestData => {
-            if (loadRequestData.media && loadRequestData.media.contentId) {
-            	console.log("1", loadRequestData)
-                return thirdparty.getMediaById(loadRequestData.media.contentId)
-                .then(media => {
-                  if (media) {
-                    loadRequestData.media.contentUrl = media.url;
-                    loadRequestData.media.contentType = media.contentType;
-                    loadRequestData.media.metadata = media.metadata;
-                  }
-                  console.log("2", loadRequestDat2)
-                  return loadRequestData;
-                });
-            }
-            console.log("3", loadRequestData)
-            return loadRequestData;
-        });
 
     context.start();
   </script>
