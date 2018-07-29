@@ -16,108 +16,29 @@
   
   <script>
     const context = cast.framework.CastReceiverContext.getInstance();
-    const player = context.getPlayerManager();
+    const playerManager = context.getPlayerManager();
 
     // intercept the LOAD request to be able to read in a contentId and get data
+    playerManager.setMessageInterceptor(
+        cast.framework.messages.MessageType.LOAD, loadRequestData => {
+            if (loadRequestData.media && loadRequestData.media.contentId) {
+            	console.log("1", loadRequestData)
+                return thirdparty.getMediaById(loadRequestData.media.contentId)
+                .then(media => {
+                  if (media) {
+                    loadRequestData.media.contentUrl = media.url;
+                    loadRequestData.media.contentType = media.contentType;
+                    loadRequestData.media.metadata = media.metadata;
+                  }
+                  console.log("2", loadRequestDat2)
+                  return loadRequestData;
+                });
+            }
+            console.log("3", loadRequestData)
+            return loadRequestData;
+        });
 
-  player.setMessageInterceptor(
-    cast.framework.messages.MessageType.LOAD,
-    request => {
-      console.log(request.media.contentId);
-      return request;
-    }
-  );
-  player.setMessageInterceptor(
-    cast.framework.messages.MessageType.QUEUE_LOAD,
-    request => {
-      console.log('queue load', request.items);
-      return request;
-    }
-  );
-  player.setMessageInterceptor(
-    cast.framework.messages.MessageType.MEDIA_STATUS,
-    status => {
-      status.customData = {};
-      return status;
-    }
-  );
-
-  
-  const YourServer = {
-    getPrevMedias: function(id) {
-      console.log('getPrevMedias', id?id:'no input');
-      return [];
-    },
-    getNextMedias: function(id) {
-      console.log('getNextMedias', id?id:'no input');
-      return [];
-    },
-    trackUsage: function(id) {
-      console.log('trackUsage', id?id:'no input');
-    }
-  };
-  const DemoQueue = class extends cast.framework.QueueBase {
-    constructor() {
-      super();
-      YourServer.onSomeEvent = this.updateEntireQueue_;
-    }
- 
-  initialize(requestData) {
-    console.log('initialize', requestData);
-    if(requestData.media.contentId !== 'queue') {
-      return null; // enable default behaviour
-    }
-    // Put the first set of items into the queue
-    var it = this.nextItems();
-    console.log('initialize', it);
-    return it.then(
-      items => {
-        console.log('got items in initialize', items);
-        const queueData = requestData.queueData || new cast.framework.messages.QueueData();
-        queueData.name = 'Your Playlist';
-        queueData.description = 'Your Playlist Description';
-        queueData.items = items;
-        return queueData;
-      });
-  }
- 
-   
-  nextItems(referenceItemId) {
-    // Assume your media has a itemId and the media url
-    var self = this;
-    return fetch('queue.json').then(function(response) {
-      return response.json();
-    }).then(function(data) {
-      return self.constructQueueList_(data);
-    });
-  }
-
-  prevItems(referenceItemId) {
-    return this.constructQueueList_(YourServer.getPrevMedias(referenceItemId));
-  }
- 
-  constructQueueList_(medias) {
-    const items = [];
-    console.log(medias);
-    for (var i=0; i<medias.length; i++) {
-      var media = medias[i];
-      console.log(media);
-      const item = new cast.framework.messages.QueueItem(media.itemId);
-      item.media = new cast.framework.messages.MediaInformation();
-      item.media.contentId = media.url;
-      item.preloadTime = 5;
-      items.push(item);
-    }
-    console.log('items', items);
-    return items;
-  }
- 
-  onCurrentItemIdChanged(itemId) {
-    console.log('We are now playing video ' + itemId);
-    YourServer.trackUsage(itemId);
-  }
-  };
-  context.start({queue: new DemoQueue()});
+    context.start();
   </script>
 </body>
 </html>
